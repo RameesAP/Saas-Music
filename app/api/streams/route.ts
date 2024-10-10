@@ -26,12 +26,12 @@ export async function POST(req: NextRequest) {
 
     const extractedId = data.url.split("?v=")[1];
 
-    prismaClient.stream.create({
+    await prismaClient.stream.create({
       data: {
         userId: data.createrId,
         url: data.url,
         extractedId,
-        type:"Youtube"
+        type: "Youtube",
       },
     });
   } catch (error) {
