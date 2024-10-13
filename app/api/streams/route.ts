@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prismaClient } from "@/app/lib/db";
 
-const YT_REGEX = new RegExp("^https://www.youtube.com/watch?v=[w-]{11}$");
+var YT_REGEX = /^(?:(?:https?:)?\/\/)?(?:www\.)?(?:m\.)?(?:youtu(?:be)?\.com\/(?:v\/|embed\/|watch(?:\/|\?v=))|youtu\.be\/)((?:\w|-){11})(?:\S+)?$/;
 
 const CreateStreamSchema = z.object({
   createrId: z.string(),
@@ -12,7 +12,7 @@ const CreateStreamSchema = z.object({
 export async function POST(req: NextRequest) {
   try {
     const data = CreateStreamSchema.parse(await req.json());
-    const isYt = YT_REGEX.test(data.url);
+    const isYt = data.url.match(YT_REGEX)
     if (!isYt) {
       return NextResponse.json(
         {
@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
 
     const extractedId = data.url.split("?v=")[1];
 
-    await prismaClient.stream.create({
+    const stream  = await prismaClient.stream.create({
       data: {
         userId: data.createrId,
         url: data.url,
@@ -34,6 +34,10 @@ export async function POST(req: NextRequest) {
         type: "Youtube",
       },
     });
+    return NextResponse.json({
+        message:"Added stream",
+        id: stream.id
+    })
   } catch (error) {
     return NextResponse.json(
       {
@@ -44,6 +48,7 @@ export async function POST(req: NextRequest) {
       }
     );
   }
+
 }
 
 export async function GET(req: NextRequest) {
