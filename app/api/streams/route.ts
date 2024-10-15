@@ -27,6 +27,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    
     const extractedId = data.url.split("?v=")[1];
 
     const res = await youtubesearchapi.GetVideoDetails(extractedId);
