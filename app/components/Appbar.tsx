@@ -20,7 +20,7 @@ const Appbar = () => {
           >
             LogOut
           </Button>
-        )}
+        )}    
         {!session.data?.user && (
           <Button
             className="bg-purple-600 text-white hover:bg-purple-700  "
