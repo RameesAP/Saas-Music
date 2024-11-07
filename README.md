@@ -8,6 +8,9 @@ this for update
 next step
 npx prisma studio
 this for show db
+
+docker start
+docker run -p 5432:5432 -e POSTGRES_PASSWORD=randompassword postgres
 ![alt text](image.png)
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).

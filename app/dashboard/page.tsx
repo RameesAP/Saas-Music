@@ -6,12 +6,14 @@ import { ChevronUp, ChevronDown, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import axios from "axios";
+import { json } from "stream/consumers";
 
 type Video = {
   id: string;
   title: string;
-  votes: number;
+  upvotes: number;
   thumbnail: string;
+  haveUpvoted: boolean;
 };
 
 const REFRESH_INTERVEL = 10 * 1000;
@@ -22,27 +24,30 @@ export default function Dashboard() {
     {
       id: "dQw4w9WgXcQ",
       title: "Rick Astley - Never Gonna Give You Up",
-      votes: 5,
+      upvotes: 5,
       thumbnail: "https://img.youtube.com/vi/dQw4w9WgXcQ/default.jpg",
+      haveUpvoted:true
     },
     {
       id: "kJQP7kiw5Fk",
       title: "Luis Fonsi - Despacito ft. Daddy Yankee",
-      votes: 3,
+      upvotes: 3,
       thumbnail: "https://img.youtube.com/vi/kJQP7kiw5Fk/default.jpg",
+      haveUpvoted:true
     },
     {
       id: "JGwWNGJdvx8",
       title: "Ed Sheeran - Shape of You",
-      votes: 2,
+      upvotes: 2,
       thumbnail: "https://img.youtube.com/vi/JGwWNGJdvx8/default.jpg",
+      haveUpvoted:true
     },
   ]);
   const [currentVideo, setCurrentVideo] = useState("dQw4w9WgXcQ");
 
   async function refershStream() {
-    const res = await fetch("/api/streams/my",{
-      credentials:"include"
+    const res = await fetch("/api/streams/my", {
+      credentials: "include",
     });
     console.log(res);
   }
@@ -58,19 +63,31 @@ export default function Dashboard() {
     const videoId = extractVideoId(videoLink);
     if (videoId) {
       const videoInfo = await fetchVideoInfo(videoId);
-      setQueue([...queue, { ...videoInfo, votes: 0 }]);
+      setQueue([...queue, { ...videoInfo, upvotes: 0 }]);
       setVideoLink("");
     }
   };
 
-  const handleVote = (id: string, increment: number) => {
+  const handleVote = (id: string, isUpvote: boolean) => {
     setQueue(
       queue
         .map((video) =>
-          video.id === id ? { ...video, votes: video.votes + increment } : video
+          video.id === id
+            ? {
+                ...video,
+                upvotes: isUpvote ? video.upvotes + 1 : video.upvotes - 1,
+                haveUpvoted: !video.haveUpvoted,
+              }
+            : video
         )
-        .sort((a, b) => b.votes - a.votes)
+        .sort((a, b) => b.upvotes - a.upvotes)
     );
+    fetch(`/api/streams/${isUpvote ? "upvote" : "downvote"}`, {
+      method: "POST",
+      body: JSON.stringify({
+        streamId: id,
+      }),
+    });
   };
 
   const extractVideoId = (url: string) => {
@@ -119,6 +136,16 @@ export default function Dashboard() {
                   className="flex-grow bg-gray-800 text-gray-100 border-gray-700"
                 />
                 <Button
+                  onClick={() => {
+                    fetch("/api/streams", {
+                      method: "POST",
+                      body: JSON.stringify({
+                        createrId: createrId,
+                        url: videoLink,
+                      }),
+                    });
+                  }}
+                  
                   type="submit"
                   className="bg-purple-600 hover:bg-purple-700 text-white"
                 >
@@ -158,25 +185,34 @@ export default function Dashboard() {
                   <span className="font-medium">{video.title}</span>
                 </div>
                 <span className="flex items-center gap-2">
-                  <Button
-                    size="icon"
-                    variant="outline"
-                    onClick={() => handleVote(video.id, 1)}
-                    className="border-gray-700 text-purple-400 hover:bg-gray-700"
-                  >
-                    <ChevronUp className="h-4 w-4" />
-                  </Button>
+                  {video.haveUpvoted ? (
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      onClick={() =>
+                        handleVote(video.id, video.haveUpvoted ? false : true)
+                      }
+                      className="border-gray-700 text-purple-400 hover:bg-gray-700"
+                    >
+                      <ChevronUp className="h-4 w-4" />
+                    </Button>
+                  ) : (
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      onClick={() =>
+                        handleVote(video.id, video.haveUpvoted ? false : true)
+                      }
+                      className="border-gray-700 text-purple-400 hover:bg-gray-700"
+                    >
+                      <ChevronDown className="h-4 w-4" />
+                    </Button>
+                  )}
+
                   <span className="font-bold min-w-[2ch] text-center text-purple-400">
-                    {video.votes}
+                    {video.upvotes}
                   </span>
-                  <Button
-                    size="icon"
-                    variant="outline"
-                    onClick={() => handleVote(video.id, -1)}
-                    className="border-gray-700 text-purple-400 hover:bg-gray-700"
-                  >
-                    <ChevronDown className="h-4 w-4" />
-                  </Button>
+
                   <Button
                     size="icon"
                     variant="outline"

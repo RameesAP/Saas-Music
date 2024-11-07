@@ -38,6 +38,9 @@ export async function POST(req: NextRequest) {
         },
       },
     });
+    return NextResponse.json({
+      message:"Donee!"
+    })
   } catch (error) {
     return NextResponse.json(
       {
