@@ -55,17 +55,29 @@ export default function Dashboard() {
   useEffect(() => {
     refershStream();
 
-    const intervel = setInterval(() => {}, REFRESH_INTERVEL);
+    const intervel = setInterval(() => {
+      refershStream();
+    }, REFRESH_INTERVEL);
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const videoId = extractVideoId(videoLink);
-    if (videoId) {
-      const videoInfo = await fetchVideoInfo(videoId);
-      setQueue([...queue, { ...videoInfo, upvotes: 0 }]);
+
+    const res = await fetch("api/streams/",{
+      method:"",
+      body:JSON.stringify({
+        creatorId:"81eefdb5-1db8-4b63-b210-ce14ee410fb0",
+        url: inputLink
+      })
+    })
+    // const videoId = extractVideoId(videoLink);
+    // if (videoId) {
+      // const videoInfo = await fetchVideoInfo(videoId);
+      setQueue([...queue,await res.json()
+        // , upvotes: 0 
+]);
       setVideoLink("");
-    }
+    // }
   };
 
   const handleVote = (id: string, isUpvote: boolean) => {
