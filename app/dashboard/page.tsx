@@ -66,7 +66,7 @@ export default function Dashboard() {
     const res = await fetch("api/streams/",{
       method:"",
       body:JSON.stringify({
-        creatorId:"81eefdb5-1db8-4b63-b210-ce14ee410fb0",
+        createrId:"81eefdb5-1db8-4b63-b210-ce14ee410fb0",
         url: inputLink
       })
     })
@@ -148,15 +148,7 @@ export default function Dashboard() {
                   className="flex-grow bg-gray-800 text-gray-100 border-gray-700"
                 />
                 <Button
-                  onClick={() => {
-                    fetch("/api/streams", {
-                      method: "POST",
-                      body: JSON.stringify({
-                        createrId: createrId,
-                        url: videoLink,
-                      }),
-                    });
-                  }}
+                  onClick={handleSubmit}
                   
                   type="submit"
                   className="bg-purple-600 hover:bg-purple-700 text-white"
